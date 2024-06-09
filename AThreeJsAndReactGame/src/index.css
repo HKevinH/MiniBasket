@@ -1,8 +1,14 @@
+@font-face {
+  font-family: "Basketball";
+  src: url("/fonts/Basketball.otf") format("opentype");
+}
+
 * {
   box-sizing: border-box;
 }
 html,
 body {
+  font-family: "Basketball", sans-serif;
   background-color: #ddc28d;
 }
 html,
@@ -15,4 +21,17 @@ body,
   padding: 0;
   overflow: hidden;
   user-select: none;
+}
+
+.points {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  font-size: 1.25rem;
 }
