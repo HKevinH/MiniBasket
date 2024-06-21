@@ -1,17 +1,22 @@
-import React, { useRef } from "react";
+/* eslint-disable react/no-unknown-property */
+import React, { useEffect, useRef } from "react";
 import { MeshTransmissionMaterial, useGLTF } from "@react-three/drei";
 import { CuboidCollider, RigidBody, vec3 } from "@react-three/rapier";
 import useGame from "../store/useGame";
 const Table = (props) => {
+  let upY = 0.5;
   const controlA = useRef(null);
   const controlB = useRef(null);
   const thrusterA = useRef(null);
   const thrusterB = useRef(null);
   const [isScored, setIsScored] = React.useState(false);
+  const isPressed = useGame((state) => state.isButtonPressed);
+  const setPressed = useGame((state) => state.setButtonPressed);
   const increaseStore = useGame((state) => state.increment);
   const { nodes, materials } = useGLTF("/models/table.gltf");
-  //#region
 
+  console.log(isPressed, "isPressed");
+  //#region
   const goal = () => {
     if (!isScored) {
       setIsScored(true);
@@ -19,10 +24,54 @@ const Table = (props) => {
     }
   };
 
-  const clickUp = (controlRef) => {
+  useEffect(() => {
+    const suscribedA = useGame.subscribe(
+      (isButtonPressed) => {
+         if (thrusterA.current) {
+        const position = vec3(thrusterA.current.translation());
+        thrusterA.current.setNextKinematicTranslation({
+          x: position.x,
+          y: position.y + upY,
+          z: position.z,
+        });
+      } else {
+        const position = vec3(thrusterB.current.translation());
+        thrusterB.current.setNextKinematicTranslation({
+          x: position.x,
+          y: position.y + upY,
+          z: position.z,
+        });
+      }
+      });
+
+    const eventUp = (event) => {
+      if (event.key === "a") {
+        clickDown(controlA, true);
+      } else if (event.key === "d") {
+        clickUp(controlB, true);
+      }
+    };
+
+    const eventDown = (event) => {
+      if (event.key === "a") {
+        clickUp(controlB, true);
+      } else if (event.key === "d") {
+        clickDown(controlB, false);
+      }
+    };
+
+    window.addEventListener("keyup", eventUp);
+    window.addEventListener("keydown", eventDown);
+    return () => {
+      window.removeEventListener("keyup", eventUp);
+      window.removeEventListener("keydown", eventDown);
+    };
+  }, []);
+
+  const clickUp = (controlRef, pressed) => {
     if (controlRef.current) {
       controlRef.current.position.y = 0.128;
-
+      setPressed(pressed);
       if (controlRef === controlA) {
         const position = vec3(thrusterA.current.translation());
         thrusterA.current.setNextKinematicTranslation({
@@ -41,26 +90,11 @@ const Table = (props) => {
     }
   };
 
-  const clickDown = (controlRef) => {
+  const clickDown = (controlRef, pressed) => {
     if (controlRef.current) {
       controlRef.current.position.y = 0.128 - 0.1;
+      setPressed(pressed);
 
-      if (controlRef === controlA) {
-        const position = vec3(thrusterA.current.translation());
-        thrusterA.current.setNextKinematicTranslation({
-          x: position.x,
-          y: position.y + 0.5,
-          z: position.z,
-        });
-      } else {
-        const position = vec3(thrusterB.current.translation());
-        thrusterB.current.setNextKinematicTranslation({
-          x: position.x,
-          y: position.y + 0.5,
-          z: position.z,
-        });
-      }
-    }
   };
 
   //#endregion

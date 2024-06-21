@@ -2,6 +2,7 @@ import React, { useRef } from "react";
 import { RigidBody } from "@react-three/rapier";
 import { useGLTF } from "@react-three/drei";
 
+// update the Ball component to use the useGLTF hookss
 const Ball = ({ position }) => {
   const { nodes, materials } = useGLTF("/models/basketball.glb");
 
